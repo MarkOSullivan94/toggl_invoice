@@ -10,9 +10,10 @@ class TogglSummary extends Equatable {
     this.totalBillable,
     required this.data,
   });
-
+  // time in milliseconds
   @JsonKey(name: 'total_grand')
   final int? totalGrand;
+  // time in milliseconds
   @JsonKey(name: 'total_billable')
   final int? totalBillable;
   final List<TogglData> data;

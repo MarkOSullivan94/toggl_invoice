@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:calculate_invoice/constants.dart';
+import 'package:calculate_invoice/constants/invoice.dart';
 
 class Money {
   final double amount;
@@ -42,5 +42,4 @@ class Money {
     }
     return '$currencySign${amount.toStringAsFixed(2)}';
   }
-
 }

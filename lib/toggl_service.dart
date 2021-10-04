@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:calculate_invoice/constants.dart';
+import 'package:calculate_invoice/constants/invoice.dart';
+import 'package:calculate_invoice/constants/toggl.dart';
 import 'package:calculate_invoice/model/invoice_dates.dart';
 import 'package:calculate_invoice/model/money.dart';
 import 'package:calculate_invoice/model/summary.dart';
@@ -40,7 +41,7 @@ class TogglService {
     if (statusCode == 200) {
       final jsonMap = json.decode(response.body);
       final summary = TogglSummary.fromJson(jsonMap);
-      printInvoiceDetails(invoiceDates, summary.totalBillable!);
+      printInvoiceDetails(invoiceDates, summary);
     } else {
       throw Exception(
           'Unable to fetch Toggl summary details: HTTP Status code - $statusCode');
@@ -74,19 +75,30 @@ class TogglService {
 
   void printInvoiceDetails(
     InvoiceDates dates,
-    int totalBillableHoursInMilliseconds,
+    TogglSummary summary,
   ) {
-    final secondsWorked = totalBillableHoursInMilliseconds / 1000;
-    final minutesWorked = secondsWorked / 60;
-    final hoursWorked = minutesWorked / 60;
+    final totalBillableHoursInMilliseconds = summary.totalBillable!;
+    final hoursWorked = _convertToHours(totalBillableHoursInMilliseconds);
+    final hoursWorkedClean = hoursWorked.toStringAsFixed(4);
     final money = Money(amount: hoursWorked.floor() * hourlyRate);
 
     print('\n===================');
     print('INVOICE DETAILS');
     print('===================');
     print('Since: ${dates.since}');
-    print('Until: ${dates.until}');
-    print('Hours: ${hoursWorked.toStringAsFixed(4)}');
-    print('Total: ${money.toStringWithCurrencySign()}');
+    print('Until: ${dates.until}\n');
+    for (TogglData data in summary.data) {
+      print('${summary.data.indexOf(data) + 1}: ${data.title.project}');
+      print('Hours: ${_convertToHours(data.time)}\n');
+    }
+    print('Overall hours: $hoursWorkedClean');
+    print('Total: ${money.toStringWithCurrencySign()} ($hoursWorkedClean hours × $currencySign${hourlyRate.toStringAsFixed(2)})');
+  }
+
+  double _convertToHours(int milliseconds) {
+    final secondsWorked = milliseconds / 1000;
+    final minutesWorked = secondsWorked / 60;
+    final hoursWorked = minutesWorked / 60;
+    return hoursWorked;
   }
 }
