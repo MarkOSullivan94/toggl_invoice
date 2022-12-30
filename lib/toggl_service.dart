@@ -82,6 +82,12 @@ class TogglService {
     final hoursWorkedClean = hoursWorked.toStringAsFixed(4);
     final money = Money(amount: hoursWorked.floor() * hourlyRate);
 
+    // Ensure vatPercentage has been added to constants/invoice.dart file
+    //
+    // If VAT is not needed then set value to 0.0
+    final vatAmount = money.amount * (1.0 + vatPercentage);
+    final vatMoney = Money(amount: vatAmount);
+
     print('\n===================');
     print('INVOICE DETAILS');
     print('===================');
@@ -93,6 +99,9 @@ class TogglService {
     }
     print('Overall hours: $hoursWorkedClean');
     print('Total: ${money.toStringWithCurrencySign()} ($hoursWorkedClean hours × $currencySign${hourlyRate.toStringAsFixed(2)})');
+    if (vatPercentage != 0.0) {
+      print('With 20% VAT: ${vatMoney.toStringWithCurrencySign()} ($hoursWorkedClean hours × $currencySign${hourlyRate.toStringAsFixed(2)})');
+    }
   }
 
   double _convertToHours(int milliseconds) {
